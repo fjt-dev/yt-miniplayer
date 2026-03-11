@@ -53,6 +53,7 @@
       display: inline-flex !important;
       align-items: center;
       justify-content: center;
+      color: white !important;
     `;
     btn.innerHTML = ICON_SVG;
 
