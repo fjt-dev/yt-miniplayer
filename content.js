@@ -54,6 +54,7 @@
       align-items: center;
       justify-content: center;
       color: white !important;
+      overflow: visible !important;
     `;
     btn.innerHTML = ICON_SVG;
 
