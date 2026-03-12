@@ -4,8 +4,8 @@
   const BUTTON_ID = 'yt-custom-miniplayer-btn';
 
   // Lucide picture-in-picture-2 icon (https://lucide.dev/icons/picture-in-picture-2)
-  // stroke="currentColor" inherits YouTube's white color for player controls
-  const ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;display:block;"><path d="M21 9V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10c0 1.1.9 2 2 2h4"/><rect width="10" height="7" x="12" y="13" rx="2"/></svg>`;
+  // data URI <img> を使い、YouTube の CSS カスケードからアイコンを完全に隔離する
+  const ICON_DATA_URI = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 9V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10c0 1.1.9 2 2 2h4"/><rect width="10" height="7" x="12" y="13" rx="2"/></svg>')}`;
 
   /**
    * ミニプレーヤーモードを起動する
@@ -53,10 +53,12 @@
       display: inline-flex !important;
       align-items: center;
       justify-content: center;
-      color: white !important;
-      overflow: visible !important;
     `;
-    btn.innerHTML = ICON_SVG;
+    const img = document.createElement('img');
+    img.src = ICON_DATA_URI;
+    img.style.cssText = 'width: 24px !important; height: 24px !important; display: block !important; pointer-events: none;';
+    img.setAttribute('draggable', 'false');
+    btn.appendChild(img);
 
     btn.addEventListener('mouseenter', () => { btn.style.opacity = '1'; });
     btn.addEventListener('mouseleave', () => { btn.style.opacity = '0.9'; });
