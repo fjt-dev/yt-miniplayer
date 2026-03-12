@@ -3,6 +3,10 @@
 
   const BUTTON_ID = 'yt-custom-miniplayer-btn';
 
+  function isWatchPage() {
+    return location.pathname === '/watch';
+  }
+
   // Lucide picture-in-picture-2 icon (https://lucide.dev/icons/picture-in-picture-2)
   // data URI <img> を使い、YouTube の CSS カスケードからアイコンを完全に隔離する
   const ICON_DATA_URI = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 9V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10c0 1.1.9 2 2 2h4"/><rect width="10" height="7" x="12" y="13" rx="2"/></svg>')}`;
@@ -174,6 +178,10 @@
   }
 
   function observePlayerReady() {
+    let domObserverConnected = false;
+    let castObserverInstance = null;
+    let castObserverPlayer = null;
+
     // SPA ナビゲーション・初回注入用の広域オブザーバー
     const domObserver = new MutationObserver(() => {
       const rightControls = document.querySelector('.ytp-right-controls');
@@ -183,16 +191,17 @@
         });
       }
     });
-    domObserver.observe(document.body, { childList: true, subtree: true });
 
     // キャスト状態変化専用オブザーバー
     // Chromecast 開始/停止時に .html5-video-player の class が変わるのを監視し、
     // YouTube の DOM 再構築が落ち着いた後（200ms）にボタンを再注入する
     function attachCastObserver() {
       const player = document.querySelector('.html5-video-player');
-      if (!player) return;
+      if (!player || player === castObserverPlayer) return;
 
-      const castObserver = new MutationObserver((mutations) => {
+      if (castObserverInstance) castObserverInstance.disconnect();
+
+      castObserverInstance = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
           if (mutation.attributeName === 'class') {
             setTimeout(() => {
@@ -206,27 +215,62 @@
           }
         }
       });
-      castObserver.observe(player, { attributes: true, attributeFilter: ['class'] });
+      castObserverInstance.observe(player, { attributes: true, attributeFilter: ['class'] });
+      castObserverPlayer = player;
     }
 
-    if (document.querySelector('.html5-video-player')) {
+    function disconnectCastObserver() {
+      if (castObserverInstance) {
+        castObserverInstance.disconnect();
+        castObserverInstance = null;
+        castObserverPlayer = null;
+      }
+    }
+
+    // /watch ページにいるときだけオブザーバーを有効化する
+    function activateObservers() {
+      if (!domObserverConnected) {
+        domObserver.observe(document.body, { childList: true, subtree: true });
+        domObserverConnected = true;
+      }
       attachCastObserver();
-    } else {
-      const waitObserver = new MutationObserver(() => {
-        if (document.querySelector('.html5-video-player')) {
-          waitObserver.disconnect();
-          attachCastObserver();
-        }
+      // ナビゲーション直後にボタンを注入試行
+      chrome.storage.local.get({ enabled: true }, (result) => {
+        if (result.enabled) injectButton();
       });
-      waitObserver.observe(document.body, { childList: true, subtree: true });
+    }
+
+    function deactivateObservers() {
+      if (domObserverConnected) {
+        domObserver.disconnect();
+        domObserverConnected = false;
+      }
+      disconnectCastObserver();
+      removeButton();
+    }
+
+    // YouTube の SPA ナビゲーションを検知する
+    document.addEventListener('yt-navigate-finish', () => {
+      if (isWatchPage()) {
+        activateObservers();
+      } else {
+        deactivateObservers();
+      }
+    });
+
+    // 初回ロード時
+    if (isWatchPage()) {
+      activateObservers();
     }
   }
 
   // 保存済みの状態を確認してから初期化する
-  chrome.storage.local.get({ enabled: true }, (result) => {
-    if (result.enabled) {
-      injectButton();
-    }
-  });
+  if (isWatchPage()) {
+    chrome.storage.local.get({ enabled: true }, (result) => {
+      if (result.enabled) {
+        injectButton();
+      }
+    });
+  }
   observePlayerReady();
 })();
