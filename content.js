@@ -113,11 +113,11 @@
     btn.id = BUTTON_ID;
     btn.className = 'ytp-button';
     btn.setAttribute('aria-label', 'Miniplayer');
-    // SVGのwidthが0pxになるYouTubeのCSSを上書きするためstyleで明示指定
+    // height・padding を上書きせず YouTube の .ytp-button スタイルに任せる
+    // vertical-align: middle で他ボタンと縦位置を揃える
     btn.style.cssText = `
-      width: 36px !important;
-      height: 36px !important;
-      padding: 6px !important;
+      width: 48px !important;
+      padding: 0 !important;
       opacity: 0.9;
       cursor: pointer;
       background: none;
@@ -127,6 +127,7 @@
       align-items: center;
       justify-content: center;
       position: relative;
+      vertical-align: middle;
     `;
     const img = document.createElement('img');
     img.src = ICON_DATA_URI;
@@ -193,8 +194,6 @@
     });
 
     // キャスト状態変化専用オブザーバー
-    // Chromecast 開始/停止時に .html5-video-player の class が変わるのを監視し、
-    // YouTube の DOM 再構築が落ち着いた後（200ms）にボタンを再注入する
     function attachCastObserver() {
       const player = document.querySelector('.html5-video-player');
       if (!player || player === castObserverPlayer) return;
@@ -227,14 +226,12 @@
       }
     }
 
-    // /watch ページにいるときだけオブザーバーを有効化する
     function activateObservers() {
       if (!domObserverConnected) {
         domObserver.observe(document.body, { childList: true, subtree: true });
         domObserverConnected = true;
       }
       attachCastObserver();
-      // ナビゲーション直後にボタンを注入試行
       chrome.storage.local.get({ enabled: true }, (result) => {
         if (result.enabled) injectButton();
       });
@@ -249,7 +246,6 @@
       removeButton();
     }
 
-    // YouTube の SPA ナビゲーションを検知する
     document.addEventListener('yt-navigate-finish', () => {
       if (isWatchPage()) {
         activateObservers();
@@ -258,13 +254,11 @@
       }
     });
 
-    // 初回ロード時
     if (isWatchPage()) {
       activateObservers();
     }
   }
 
-  // 保存済みの状態を確認してから初期化する
   if (isWatchPage()) {
     chrome.storage.local.get({ enabled: true }, (result) => {
       if (result.enabled) {
