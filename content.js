@@ -32,14 +32,62 @@
   }
 
   /**
+   * YouTube スタイルのツールチップを作成する
+   */
+  function createTooltip() {
+    const container = document.createElement('div');
+    container.style.cssText = `
+      position: absolute;
+      bottom: 49px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2147483647;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.1s ease-in;
+      white-space: nowrap;
+    `;
+
+    const text = document.createElement('span');
+    text.textContent = 'Miniplayer';
+    text.style.cssText = `
+      background: rgba(28, 28, 28, 0.9);
+      color: #fff;
+      font-family: Roboto, Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 16px;
+      padding: 5px 8px;
+      border-radius: 2px;
+      display: block;
+    `;
+    container.appendChild(text);
+
+    const arrow = document.createElement('div');
+    arrow.style.cssText = `
+      position: absolute;
+      bottom: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 5px solid rgba(28, 28, 28, 0.9);
+    `;
+    container.appendChild(arrow);
+
+    return container;
+  }
+
+  /**
    * カスタムボタンを作成する
    */
   function createButton() {
     const btn = document.createElement('button');
     btn.id = BUTTON_ID;
     btn.className = 'ytp-button';
-    btn.title = 'ミニプレーヤー';
-    btn.setAttribute('aria-label', 'ミニプレーヤー');
+    btn.setAttribute('aria-label', 'Miniplayer');
     // SVGのwidthが0pxになるYouTubeのCSSを上書きするためstyleで明示指定
     btn.style.cssText = `
       width: 36px !important;
@@ -53,6 +101,7 @@
       display: inline-flex !important;
       align-items: center;
       justify-content: center;
+      position: relative;
     `;
     const img = document.createElement('img');
     img.src = ICON_DATA_URI;
@@ -60,8 +109,11 @@
     img.setAttribute('draggable', 'false');
     btn.appendChild(img);
 
-    btn.addEventListener('mouseenter', () => { btn.style.opacity = '1'; });
-    btn.addEventListener('mouseleave', () => { btn.style.opacity = '0.9'; });
+    const tooltip = createTooltip();
+    btn.appendChild(tooltip);
+
+    btn.addEventListener('mouseenter', () => { btn.style.opacity = '1'; tooltip.style.opacity = '1'; });
+    btn.addEventListener('mouseleave', () => { btn.style.opacity = '0.9'; tooltip.style.opacity = '0'; });
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       activateMiniPlayer();
