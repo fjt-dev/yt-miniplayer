@@ -99,13 +99,48 @@
   }
 
   function observePlayerReady() {
-    const observer = new MutationObserver(() => {
+    // SPA ナビゲーション・初回注入用の広域オブザーバー
+    const domObserver = new MutationObserver(() => {
       const rightControls = document.querySelector('.ytp-right-controls');
       if (rightControls && !document.getElementById(BUTTON_ID)) {
         injectButton();
       }
     });
-    observer.observe(document.body, { childList: true, subtree: true });
+    domObserver.observe(document.body, { childList: true, subtree: true });
+
+    // キャスト状態変化専用オブザーバー
+    // Chromecast 開始/停止時に .html5-video-player の class が変わるのを監視し、
+    // YouTube の DOM 再構築が落ち着いた後（200ms）にボタンを再注入する
+    function attachCastObserver() {
+      const player = document.querySelector('.html5-video-player');
+      if (!player) return;
+
+      const castObserver = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+          if (mutation.attributeName === 'class') {
+            setTimeout(() => {
+              if (!document.getElementById(BUTTON_ID)) {
+                injectButton();
+              }
+            }, 200);
+            break;
+          }
+        }
+      });
+      castObserver.observe(player, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    if (document.querySelector('.html5-video-player')) {
+      attachCastObserver();
+    } else {
+      const waitObserver = new MutationObserver(() => {
+        if (document.querySelector('.html5-video-player')) {
+          waitObserver.disconnect();
+          attachCastObserver();
+        }
+      });
+      waitObserver.observe(document.body, { childList: true, subtree: true });
+    }
   }
 
   injectButton();
