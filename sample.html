@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>YouTube Miniplayer Button – Popup Preview</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 260px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #212121;
+      color: #FFFFFF;
+      padding: 20px;
+    }
+
+    .header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .header-icon {
+      display: flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; color: #FF0033; flex-shrink: 0;
+    }
+    .header-icon svg { width: 24px; height: 24px; }
+    .header-title { font-size: 13px; font-weight: 600; color: #FFFFFF; line-height: 1.3; }
+    .header-subtitle { font-size: 11px; color: #aaaaaa; margin-top: 1px; }
+
+    .status-card {
+      background: #2a2a2a;
+      border: 1px solid #444444;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      transition: border-color 0.2s;
+    }
+    .status-card.active { border-color: #FF0033; }
+
+    .status-row { display: flex; align-items: center; justify-content: space-between; }
+    .status-label { display: flex; align-items: center; gap: 8px; }
+
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #FF0033;
+      box-shadow: 0 0 6px #FF0033aa;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .status-dot.off { background: #888888; box-shadow: none; }
+
+    .status-text { font-size: 13px; font-weight: 500; }
+
+    .toggle { position: relative; width: 44px; height: 24px; cursor: pointer; }
+    .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-track {
+      position: absolute; inset: 0;
+      background: #555555;
+      border-radius: 12px;
+      transition: background 0.2s;
+    }
+    .toggle input:checked + .toggle-track { background: #FF0033; }
+    .toggle-thumb {
+      position: absolute; top: 3px; left: 3px;
+      width: 18px; height: 18px;
+      background: #FFFFFF;
+      border-radius: 50%;
+      transition: transform 0.2s;
+      pointer-events: none;
+    }
+    .toggle input:checked ~ .toggle-thumb { transform: translateX(20px); }
+
+    .status-description { margin-top: 10px; font-size: 11px; color: #aaaaaa; line-height: 1.5; }
+    .status-description span { color: #FF0033; font-weight: 500; }
+    .status-description span.off { color: #888888; }
+
+    .divider { border: none; border-top: 1px solid #444444; margin: 4px 0 14px; }
+
+    .footer { display: flex; align-items: center; justify-content: flex-end; }
+
+    .github-link {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; color: #aaaaaa;
+      text-decoration: none;
+      padding: 4px 8px;
+      border-radius: 5px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .github-link:hover { color: #FFFFFF; background: #333333; }
+    .github-link svg { width: 13px; height: 13px; fill: currentColor; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <span class="header-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 9V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10c0 1.1.9 2 2 2h4"/>
+        <rect width="10" height="7" x="12" y="13" rx="2"/>
+      </svg>
+    </span>
+    <div>
+      <div class="header-title">YouTube Miniplayer Button</div>
+      <div class="header-subtitle">youtube.com</div>
+    </div>
+  </div>
+
+  <div class="status-card active" id="statusCard">
+    <div class="status-row">
+      <div class="status-label">
+        <div class="status-dot" id="statusDot"></div>
+        <span class="status-text" id="statusText">Enabled</span>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="toggle" checked />
+        <div class="toggle-track"></div>
+        <div class="toggle-thumb"></div>
+      </label>
+    </div>
+    <div class="status-description">
+      Miniplayer button is <span id="statusSpan">enabled</span> on YouTube.
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="footer">
+    <a class="github-link" href="https://github.com/fjt-dev/yt-miniplayer" target="_blank">
+      <svg viewBox="0 0 16 16" aria-hidden="true">
+        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+          0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
+          -.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66
+          .07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15
+          -.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27
+          .68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12
+          .51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48
+          0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+      </svg>
+      View on GitHub
+    </a>
+  </div>
+
+  <script>
+    const toggle = document.getElementById("toggle");
+    const statusDot = document.getElementById("statusDot");
+    const statusText = document.getElementById("statusText");
+    const statusSpan = document.getElementById("statusSpan");
+    const statusCard = document.getElementById("statusCard");
+
+    let enabled = localStorage.getItem("enabled") !== "false";
+    toggle.checked = enabled;
+    updateUI(enabled);
+
+    function updateUI(enabled) {
+      if (enabled) {
+        statusDot.classList.remove("off");
+        statusText.textContent = "Enabled";
+        statusCard.classList.add("active");
+        statusSpan.textContent = "enabled";
+        statusSpan.classList.remove("off");
+      } else {
+        statusDot.classList.add("off");
+        statusText.textContent = "Disabled";
+        statusCard.classList.remove("active");
+        statusSpan.textContent = "disabled";
+        statusSpan.classList.add("off");
+      }
+    }
+
+    toggle.addEventListener("change", () => {
+      enabled = toggle.checked;
+      localStorage.setItem("enabled", enabled);
+      updateUI(enabled);
+    });
+  </script>
+
+</body>
+</html>

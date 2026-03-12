@@ -8,6 +8,27 @@
   const ICON_DATA_URI = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 9V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10c0 1.1.9 2 2 2h4"/><rect width="10" height="7" x="12" y="13" rx="2"/></svg>')}`;
 
   /**
+   * ボタンの表示・非表示を切り替える
+   */
+  function removeButton() {
+    const existing = document.getElementById(BUTTON_ID);
+    if (existing) existing.remove();
+  }
+
+  /**
+   * ポップアップからのメッセージを受信する
+   */
+  chrome.runtime.onMessage.addListener((message) => {
+    if (message.type === 'toggle') {
+      if (message.enabled) {
+        injectButton();
+      } else {
+        removeButton();
+      }
+    }
+  });
+
+  /**
    * ミニプレーヤーモードを起動する
    * コンテキストメニューを一時的に表示してミニプレーヤー項目をクリック
    */
@@ -157,7 +178,9 @@
     const domObserver = new MutationObserver(() => {
       const rightControls = document.querySelector('.ytp-right-controls');
       if (rightControls && !document.getElementById(BUTTON_ID)) {
-        injectButton();
+        chrome.storage.local.get({ enabled: true }, (result) => {
+          if (result.enabled) injectButton();
+        });
       }
     });
     domObserver.observe(document.body, { childList: true, subtree: true });
@@ -174,7 +197,9 @@
           if (mutation.attributeName === 'class') {
             setTimeout(() => {
               if (!document.getElementById(BUTTON_ID)) {
-                injectButton();
+                chrome.storage.local.get({ enabled: true }, (result) => {
+                  if (result.enabled) injectButton();
+                });
               }
             }, 200);
             break;
@@ -197,6 +222,11 @@
     }
   }
 
-  injectButton();
+  // 保存済みの状態を確認してから初期化する
+  chrome.storage.local.get({ enabled: true }, (result) => {
+    if (result.enabled) {
+      injectButton();
+    }
+  });
   observePlayerReady();
 })();
