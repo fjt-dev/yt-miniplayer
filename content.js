@@ -7,9 +7,9 @@
     return location.pathname === '/watch';
   }
 
-  // Lucide picture-in-picture-2 icon (https://lucide.dev/icons/picture-in-picture-2)
+  // カスタムミニプレーヤーアイコン
   // data URI <img> を使い、YouTube の CSS カスケードからアイコンを完全に隔離する
-  const ICON_DATA_URI = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 9V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10c0 1.1.9 2 2 2h4"/><rect width="10" height="7" x="12" y="13" rx="2"/></svg>')}`;
+  const ICON_DATA_URI = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="2.75" y="5.75" width="18.5" height="12.5" rx="1.25" stroke="white" stroke-width="1.5"/><rect x="12.25" y="11.25" width="7.5" height="5.5" rx="0.75" fill="none" stroke="white" stroke-width="0.5"/></svg>')}`;
 
   /**
    * ボタンの表示・非表示を切り替える
