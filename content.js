@@ -9,7 +9,7 @@
 
   // カスタムミニプレーヤーアイコン
   // data URI <img> を使い、YouTube の CSS カスケードからアイコンを完全に隔離する
-  const ICON_DATA_URI = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="2.75" y="5.75" width="18.5" height="12.5" rx="1.25" stroke="white" stroke-width="1.5"/><rect x="12.25" y="11.25" width="7.5" height="5.5" rx="0.75" fill="none" stroke="white" stroke-width="0.5"/></svg>')}`;
+  const ICON_DATA_URI = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2" stroke="white" stroke-width="2"/><rect x="13" y="12" width="7" height="5" rx="1" stroke="white" stroke-width="2"/></svg>')}`;
 
   /**
    * ボタンの表示・非表示を切り替える
