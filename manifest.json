@@ -3,7 +3,15 @@
   "name": "YouTube ミニプレーヤーボタン",
   "version": "1.0",
   "description": "YouTubeのコントロールバーにミニプレーヤーボタンを追加します",
-  "permissions": [],
+  "permissions": ["storage"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
   "content_scripts": [
     {
       "matches": ["https://www.youtube.com/watch*"],

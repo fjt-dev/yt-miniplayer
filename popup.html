@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube ミニプレーヤーボタン</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="panel">
+    <div class="header">
+      <img src="icon48.png" alt="Logo" class="logo">
+      <h1>YouTube ミニプレーヤー</h1>
+    </div>
+    <div class="section">
+      <div class="toggle-row">
+        <span class="toggle-label">ボタンを表示</span>
+        <label class="switch">
+          <input type="checkbox" id="enabled-toggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+      <p class="description">YouTubeプレーヤーのコントロールバーにミニプレーヤーボタンを表示します。</p>
+    </div>
+    <div class="section status-section">
+      <span id="status-text" class="status enabled">有効</span>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
