@@ -3,6 +3,17 @@
 
   const BUTTON_ID = 'yt-custom-miniplayer-btn';
 
+  /**
+   * 拡張機能のコンテキストが有効かどうかを確認する
+   */
+  function isExtensionContextValid() {
+    try {
+      return !!chrome.runtime && !!chrome.runtime.id;
+    } catch (e) {
+      return false;
+    }
+  }
+
   function isWatchPage() {
     return location.pathname === '/watch';
   }
@@ -187,6 +198,7 @@
     const domObserver = new MutationObserver(() => {
       const rightControls = document.querySelector('.ytp-right-controls');
       if (rightControls && !document.getElementById(BUTTON_ID)) {
+        if (!isExtensionContextValid()) return;
         chrome.storage.local.get({ enabled: true }, (result) => {
           if (result.enabled) injectButton();
         });
@@ -204,7 +216,7 @@
         for (const mutation of mutations) {
           if (mutation.attributeName === 'class') {
             setTimeout(() => {
-              if (!document.getElementById(BUTTON_ID)) {
+              if (!document.getElementById(BUTTON_ID) && isExtensionContextValid()) {
                 chrome.storage.local.get({ enabled: true }, (result) => {
                   if (result.enabled) injectButton();
                 });
@@ -232,6 +244,7 @@
         domObserverConnected = true;
       }
       attachCastObserver();
+      if (!isExtensionContextValid()) return;
       chrome.storage.local.get({ enabled: true }, (result) => {
         if (result.enabled) injectButton();
       });
@@ -259,7 +272,7 @@
     }
   }
 
-  if (isWatchPage()) {
+  if (isWatchPage() && isExtensionContextValid()) {
     chrome.storage.local.get({ enabled: true }, (result) => {
       if (result.enabled) {
         injectButton();
