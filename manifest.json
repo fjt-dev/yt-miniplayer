@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "yt-miniplayer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Add a mini-player button to the YouTube control bar.",
   "permissions": ["storage"],
   "action": {
