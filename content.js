@@ -33,17 +33,15 @@
   /**
    * ポップアップからのメッセージを受信する
    */
-  if (isExtensionContextValid()) {
-    chrome.runtime.onMessage.addListener((message) => {
-      if (message.type === 'toggle') {
-        if (message.enabled) {
-          injectButton();
-        } else {
-          removeButton();
-        }
+  chrome.runtime.onMessage.addListener((message) => {
+    if (message.type === 'toggle') {
+      if (message.enabled) {
+        injectButton();
+      } else {
+        removeButton();
       }
-    });
-  }
+    }
+  });
 
   /**
    * ミニプレーヤーモードを起動する
