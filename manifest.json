@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "YouTube ミニプレーヤーボタン",
-  "version": "1.0",
-  "description": "YouTubeのコントロールバーにミニプレーヤーボタンを追加します",
+  "name": "yt-miniplayer",
+  "version": "1.0.1",
+  "description": "Add a mini-player button to the YouTube control bar.",
   "permissions": ["storage"],
   "action": {
     "default_popup": "popup.html",
