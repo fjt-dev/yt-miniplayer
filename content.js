@@ -159,6 +159,7 @@
     if (!isShortsBlocked && !isPlayablesBlocked) {
       if (blockerObserver) blockerObserver.disconnect();
       blockerObserver = null;
+      blockerRafPending = false;
       return;
     }
     if (blockerObserver) return;
