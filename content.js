@@ -2,6 +2,7 @@
   'use strict';
 
   const BUTTON_ID = 'yt-custom-miniplayer-btn';
+  let isMiniplayerEnabled = false;
 
   /**
    * 拡張機能のコンテキストが有効かどうかを確認する
@@ -33,98 +34,102 @@
   // --- Shorts Blocker ---
 
   const SHORTS_LABELS = ['ショート', 'Shorts'];
-  const GAME_ROOM_LABELS = [
-    'ゲームルーム',   // 日本語
-    'Gaming',        // English / Deutsch / Nederlands
-    '게임',           // 한국어
-    '游戏',           // 中文（简体）
-    '遊戲',           // 中文（繁體）
-    'Videojuegos',   // Español
-    'Jogos',         // Português
-    'Jeux',          // Français
-    'Giochi',        // Italiano
-    'Spiele',        // Deutsch (alternative)
-    'Игры',          // Русский
-    'الألعاب',       // العربية
-    'Oyun',          // Türkçe
-    'Gry',           // Polski
-    'เกม',           // ภาษาไทย
-    'Trò chơi',      // Tiếng Việt
-    'गेमिंग',        // हिन्दी
-    'Games',         // Bahasa Indonesia / Bahasa Melayu
-  ];
   const SHORTS_STYLE_ID = 'yt-shorts-blocker-style';
+  const PLAYABLES_STYLE_ID = 'yt-playables-blocker-style';
+  const SHORTS_HIDDEN_ATTR = 'data-yt-tools-shorts-hidden';
+  const PLAYABLES_HIDDEN_ATTR = 'data-yt-tools-playables-hidden';
 
   // CSS で即座に非表示にできる Shorts 要素（テキスト照合不要なもの）
   const SHORTS_CSS = [
     'ytd-rich-shelf-renderer[is-shorts]',
     'ytd-reel-shelf-renderer',
+    `[${SHORTS_HIDDEN_ATTR}]`,
   ].join(',') + '{ display: none !important; }';
 
-  function injectShortsCSS() {
-    if (document.getElementById(SHORTS_STYLE_ID)) return;
+  const PLAYABLES_CSS = `[${PLAYABLES_HIDDEN_ATTR}]{ display: none !important; }`;
+
+  function injectStyle(id, css) {
+    if (document.getElementById(id)) return;
     const style = document.createElement('style');
-    style.id = SHORTS_STYLE_ID;
-    style.textContent = SHORTS_CSS;
+    style.id = id;
+    style.textContent = css;
     (document.head || document.documentElement).appendChild(style);
   }
 
-  function removeShortsCSS() {
-    const style = document.getElementById(SHORTS_STYLE_ID);
+  function removeStyle(id) {
+    const style = document.getElementById(id);
     if (style) style.remove();
+  }
+
+  function injectShortsCSS() {
+    injectStyle(SHORTS_STYLE_ID, SHORTS_CSS);
+  }
+
+  function removeShortsCSS() {
+    removeStyle(SHORTS_STYLE_ID);
   }
 
   function isShortsLabel(text) {
     return SHORTS_LABELS.includes(text.trim());
   }
 
-  function isGameRoomLabel(text) {
-    return GAME_ROOM_LABELS.includes(text.trim());
-  }
-
   function removeShorts() {
     document.querySelectorAll('ytd-guide-entry-renderer').forEach((el) => {
       const title = el.querySelector('.title');
-      if (title && isShortsLabel(title.textContent)) el.remove();
+      if (title && isShortsLabel(title.textContent)) el.setAttribute(SHORTS_HIDDEN_ATTR, '');
     });
     document.querySelectorAll('ytd-mini-guide-entry-renderer').forEach((el) => {
       const label = el.querySelector('.guide-entry-label');
-      if (label && isShortsLabel(label.textContent)) el.remove();
+      if (label && isShortsLabel(label.textContent)) el.setAttribute(SHORTS_HIDDEN_ATTR, '');
     });
     document.querySelectorAll('yt-chip-cloud-chip-renderer').forEach((el) => {
       const text = el.querySelector('yt-formatted-string');
-      if (text && isShortsLabel(text.textContent)) el.remove();
+      if (text && isShortsLabel(text.textContent)) el.setAttribute(SHORTS_HIDDEN_ATTR, '');
     });
-    document.querySelectorAll('ytd-rich-shelf-renderer').forEach((el) => {
+    document.querySelectorAll('ytd-rich-shelf-renderer, ytd-shelf-renderer').forEach((el) => {
       const title = el.querySelector('#title-text');
-      if (title && isShortsLabel(title.textContent)) el.remove();
+      if (title && isShortsLabel(title.textContent)) el.setAttribute(SHORTS_HIDDEN_ATTR, '');
+    });
+    document.querySelectorAll('ytd-video-renderer, ytd-compact-video-renderer').forEach((el) => {
+      const link = el.querySelector('a#video-title, a#thumbnail');
+      if (link && (link.getAttribute('href') || '').startsWith('/shorts/')) {
+        el.setAttribute(SHORTS_HIDDEN_ATTR, '');
+      }
     });
   }
 
-  function isGameRoomEntry(el) {
-    const link = el.querySelector('a');
-    if (link) {
-      const href = link.getAttribute('href') || '';
-      if (href === '/gaming' || href.startsWith('/gaming?') || href.includes('/gaming')) return true;
-    }
-    const title = el.querySelector('.title, .guide-entry-label, yt-formatted-string');
-    return title ? isGameRoomLabel(title.textContent) : false;
+  function restoreShorts() {
+    document.querySelectorAll(`[${SHORTS_HIDDEN_ATTR}]`).forEach((el) => {
+      el.removeAttribute(SHORTS_HIDDEN_ATTR);
+    });
   }
 
-  function removeGameRoom() {
+  function isPlayablesEntry(el) {
+    const link = el.querySelector('a');
+    const href = link ? link.getAttribute('href') || '' : '';
+    return href === '/playables' || href.startsWith('/playables?') || href.startsWith('/playables/');
+  }
+
+  function removePlayables() {
     document.querySelectorAll('ytd-guide-entry-renderer').forEach((el) => {
-      if (isGameRoomEntry(el)) el.remove();
+      if (isPlayablesEntry(el)) el.setAttribute(PLAYABLES_HIDDEN_ATTR, '');
     });
     document.querySelectorAll('ytd-mini-guide-entry-renderer').forEach((el) => {
-      if (isGameRoomEntry(el)) el.remove();
+      if (isPlayablesEntry(el)) el.setAttribute(PLAYABLES_HIDDEN_ATTR, '');
     });
-    document.querySelectorAll('yt-chip-cloud-chip-renderer').forEach((el) => {
-      const text = el.querySelector('yt-formatted-string');
-      if (text && isGameRoomLabel(text.textContent)) el.remove();
+    document.querySelectorAll('ytd-rich-item-renderer, ytd-item-section-renderer, yt-chip-cloud-chip-renderer').forEach((el) => {
+      const link = el.querySelector('a[href^="/playables"]');
+      if (link) el.setAttribute(PLAYABLES_HIDDEN_ATTR, '');
     });
   }
 
-  // SPA ナビゲーション時に /shorts/ → /watch、/playables/ → ホームへ転送する
+  function restorePlayables() {
+    document.querySelectorAll(`[${PLAYABLES_HIDDEN_ATTR}]`).forEach((el) => {
+      el.removeAttribute(PLAYABLES_HIDDEN_ATTR);
+    });
+  }
+
+  // SPA ナビゲーション時に /shorts/ → /watch へ転送する
   function redirectShortsUrl() {
     const shortsMatch = location.pathname.match(/^\/shorts\/([a-zA-Z0-9_-]+)/);
     if (shortsMatch) {
@@ -136,50 +141,71 @@
       location.replace('https://www.youtube.com/watch?v=' + shortsMatch[1] + query);
       return true;
     }
-    if (location.pathname.startsWith('/playables')) {
-      location.replace('https://www.youtube.com/');
-      return true;
-    }
     return false;
   }
 
-  let shortsObserver = null;
+  function redirectPlayablesUrl() {
+    if (!location.pathname.startsWith('/playables')) return false;
+    location.replace('https://www.youtube.com/');
+    return true;
+  }
+
   let isShortsBlocked = false;
-  let shortsRafPending = false;
+  let isPlayablesBlocked = false;
+  let blockerObserver = null;
+  let blockerRafPending = false;
+
+  function updateBlockerObserver() {
+    if (!isShortsBlocked && !isPlayablesBlocked) {
+      if (blockerObserver) blockerObserver.disconnect();
+      blockerObserver = null;
+      return;
+    }
+    if (blockerObserver) return;
+    blockerObserver = new MutationObserver((mutations) => {
+      if (blockerRafPending || !mutations.some((m) => m.addedNodes.length > 0)) return;
+      blockerRafPending = true;
+      requestAnimationFrame(() => {
+        blockerRafPending = false;
+        if (isShortsBlocked) removeShorts();
+        if (isPlayablesBlocked) removePlayables();
+      });
+    });
+    blockerObserver.observe(document.body || document.documentElement, { childList: true, subtree: true });
+  }
 
   function startShortsBlocking() {
     isShortsBlocked = true;
     injectShortsCSS();
     removeShorts();
-    removeGameRoom();
     redirectShortsUrl();
-    if (!shortsObserver) {
-      shortsObserver = new MutationObserver((mutations) => {
-        if (shortsRafPending) return;
-        if (!mutations.some((m) => m.addedNodes.length > 0)) return;
-        shortsRafPending = true;
-        requestAnimationFrame(() => {
-          shortsRafPending = false;
-          removeShorts();
-          removeGameRoom();
-        });
-      });
-      shortsObserver.observe(document.body || document.documentElement, { childList: true, subtree: true });
-    }
+    updateBlockerObserver();
   }
 
   function stopShortsBlocking() {
     isShortsBlocked = false;
     removeShortsCSS();
-    if (shortsObserver) {
-      shortsObserver.disconnect();
-      shortsObserver = null;
+    restoreShorts();
+    updateBlockerObserver();
+  }
+
+  function setPlayablesBlocking(enabled) {
+    isPlayablesBlocked = enabled;
+    if (enabled) {
+      injectStyle(PLAYABLES_STYLE_ID, PLAYABLES_CSS);
+      removePlayables();
+      redirectPlayablesUrl();
+    } else {
+      removeStyle(PLAYABLES_STYLE_ID);
+      restorePlayables();
     }
+    updateBlockerObserver();
   }
 
   if (isExtensionContextValid()) {
-    chrome.storage.local.get({ shortsBlocked: false }, (result) => {
+    chrome.storage.local.get({ shortsBlocked: false, playablesBlocked: false }, (result) => {
       if (result.shortsBlocked) startShortsBlocking();
+      setPlayablesBlocking(result.playablesBlocked);
     });
   }
 
@@ -190,6 +216,7 @@
    */
   chrome.runtime.onMessage.addListener((message) => {
     if (message.type === 'toggle') {
+      isMiniplayerEnabled = message.enabled;
       if (message.enabled) {
         injectButton();
       } else {
@@ -203,6 +230,9 @@
         stopShortsBlocking();
       }
     }
+    if (message.type === 'playablesToggle') {
+      setPlayablesBlocking(message.enabled);
+    }
   });
 
   /**
@@ -210,23 +240,52 @@
    * コンテキストメニューを一時的に表示してミニプレーヤー項目をクリック
    */
   function activateMiniPlayer() {
-    const video = document.querySelector('video');
+    const player = document.querySelector('.html5-video-player');
+    const video = player && player.querySelector('video');
     if (!video) return;
+
+    // YouTube側のボタンがDOMに残っている場合は、その標準処理を優先する。
+    const nativeButton = player.querySelector('.ytp-miniplayer-button');
+    if (nativeButton && nativeButton.id !== BUTTON_ID) {
+      nativeButton.click();
+      return;
+    }
 
     video.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
 
-    requestAnimationFrame(() => {
-      const menuItems = document.querySelectorAll('.ytp-menuitem');
-      const miniItem = Array.from(menuItems).find(el =>
-        el.textContent.includes('ミニプレーヤー') ||
-        el.textContent.includes('Mini player') ||
-        el.textContent.includes('Miniplayer') ||
-        el.textContent.toLowerCase().includes('mini')
-      );
+    const labels = ['ミニプレーヤー', 'mini player', 'miniplayer'];
+    let attempts = 0;
+
+    function clickMenuItemWhenReady() {
+      attempts += 1;
+      // YouTubeはコンテキストメニューをplayer外へ配置することがあるため、
+      // document全体から「表示中のコンテキストメニュー」だけを対象にする。
+      const menus = Array.from(document.querySelectorAll('.ytp-contextmenu')).filter((el) => {
+        const style = getComputedStyle(el);
+        return style.display !== 'none' && style.visibility !== 'hidden' && el.getClientRects().length > 0;
+      });
+      const menuItems = menus.flatMap((menu) => Array.from(menu.querySelectorAll('.ytp-menuitem')));
+      const miniItem = Array.from(menuItems).find((el) => {
+        const text = (el.getAttribute('aria-label') || el.textContent).trim().toLowerCase();
+        return labels.some((label) => text === label || text.startsWith(`${label} `) || text.startsWith(`${label}（`));
+      });
       if (miniItem) {
         miniItem.click();
+        return;
       }
-    });
+      if (attempts < 6) {
+        setTimeout(clickMenuItemWhenReady, 50);
+        return;
+      }
+      // 項目が見つからなければ、開いたコンテキストメニューを閉じる。
+      video.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
+      // YouTube標準のミニプレーヤーショートカットを最後の代替手段として送る。
+      const shortcut = { key: 'i', code: 'KeyI', keyCode: 73, which: 73, bubbles: true, cancelable: true };
+      document.dispatchEvent(new KeyboardEvent('keydown', shortcut));
+      document.dispatchEvent(new KeyboardEvent('keyup', shortcut));
+    }
+
+    setTimeout(clickMenuItemWhenReady, 0);
   }
 
   /**
@@ -352,32 +411,46 @@
   }
 
   function observePlayerReady() {
-    let domObserverConnected = false;
+    let bootstrapObserverConnected = false;
+    let controlsObserverInstance = null;
+    let controlsObserverPlayer = null;
     let castObserverInstance = null;
     let castObserverPlayer = null;
 
-    // SPA ナビゲーション・初回注入用の広域オブザーバー
-    // ボタン注入後は disconnect して不要な監視を止める
+    // プレーヤーがまだない初回読み込みだけ、ページ全体を監視する。
     let domRafPending = false;
-    const domObserver = new MutationObserver(() => {
-      if (document.getElementById(BUTTON_ID)) {
-        domObserver.disconnect();
-        domObserverConnected = false;
-        return;
-      }
+    const bootstrapObserver = new MutationObserver(() => {
       if (domRafPending) return;
       domRafPending = true;
       requestAnimationFrame(() => {
         domRafPending = false;
-        if (document.getElementById(BUTTON_ID)) return;
-        const rightControls = document.querySelector('.ytp-right-controls');
-        if (!rightControls) return;
-        if (!isExtensionContextValid()) return;
-        chrome.storage.local.get({ enabled: true }, (result) => {
-          if (result.enabled) injectButton();
-        });
+        const player = document.querySelector('.html5-video-player');
+        if (!player) return;
+        attachControlsObserver();
+        bootstrapObserver.disconnect();
+        bootstrapObserverConnected = false;
       });
     });
+
+    // YouTubeがコントロールバーを再構築してもボタンを戻せるよう、
+    // ページ全体ではなくプレーヤー内だけを継続監視する。
+    function attachControlsObserver() {
+      const player = document.querySelector('.html5-video-player');
+      if (!player || player === controlsObserverPlayer) return;
+      if (controlsObserverInstance) controlsObserverInstance.disconnect();
+      controlsObserverInstance = new MutationObserver(() => {
+        if (!isMiniplayerEnabled || document.getElementById(BUTTON_ID) || !isExtensionContextValid()) return;
+        injectButton();
+      });
+      controlsObserverInstance.observe(player, { childList: true, subtree: true });
+      controlsObserverPlayer = player;
+    }
+
+    function disconnectControlsObserver() {
+      if (controlsObserverInstance) controlsObserverInstance.disconnect();
+      controlsObserverInstance = null;
+      controlsObserverPlayer = null;
+    }
 
     // キャスト状態変化専用オブザーバー
     function attachCastObserver() {
@@ -390,10 +463,8 @@
         for (const mutation of mutations) {
           if (mutation.attributeName === 'class') {
             setTimeout(() => {
-              if (!document.getElementById(BUTTON_ID) && isExtensionContextValid()) {
-                chrome.storage.local.get({ enabled: true }, (result) => {
-                  if (result.enabled) injectButton();
-                });
+              if (isMiniplayerEnabled && !document.getElementById(BUTTON_ID) && isExtensionContextValid()) {
+                injectButton();
               }
             }, 200);
             break;
@@ -413,28 +484,28 @@
     }
 
     function activateObservers() {
-      if (!domObserverConnected) {
-        domObserver.observe(document.body || document.documentElement, { childList: true, subtree: true });
-        domObserverConnected = true;
+      attachControlsObserver();
+      if (!controlsObserverPlayer && !bootstrapObserverConnected) {
+        bootstrapObserver.observe(document.body || document.documentElement, { childList: true, subtree: true });
+        bootstrapObserverConnected = true;
       }
       attachCastObserver();
-      if (!isExtensionContextValid()) return;
-      chrome.storage.local.get({ enabled: true }, (result) => {
-        if (result.enabled) injectButton();
-      });
+      if (isMiniplayerEnabled && isExtensionContextValid()) injectButton();
     }
 
     function deactivateObservers() {
-      if (domObserverConnected) {
-        domObserver.disconnect();
-        domObserverConnected = false;
+      if (bootstrapObserverConnected) {
+        bootstrapObserver.disconnect();
+        bootstrapObserverConnected = false;
       }
+      disconnectControlsObserver();
       disconnectCastObserver();
       removeButton();
     }
 
     document.addEventListener('yt-navigate-finish', () => {
       if (isShortsBlocked && redirectShortsUrl()) return;
+      if (isPlayablesBlocked && redirectPlayablesUrl()) return;
       if (isWatchPage()) {
         activateObservers();
       } else {
@@ -447,11 +518,10 @@
     }
   }
 
-  if (isWatchPage() && isExtensionContextValid()) {
+  if (isExtensionContextValid()) {
     chrome.storage.local.get({ enabled: true }, (result) => {
-      if (result.enabled) {
-        injectButton();
-      }
+      isMiniplayerEnabled = result.enabled;
+      if (isMiniplayerEnabled && isWatchPage()) injectButton();
     });
   }
   observePlayerReady();

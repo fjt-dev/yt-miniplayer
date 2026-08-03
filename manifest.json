@@ -1,13 +1,14 @@
 {
   "manifest_version": 3,
   "name": "yt-tools",
-  "version": "2.0.0",
-  "description": "Add a mini player and remove Shorts on YouTube.",
-  "permissions": ["storage", "declarativeNetRequest", "tabs"],
+  "version": "2.1.0",
+  "description": "Add a miniplayer button and optionally block Shorts and YouTube minigames.",
+  "permissions": ["storage", "declarativeNetRequest"],
   "host_permissions": ["https://www.youtube.com/*"],
   "declarative_net_request": {
     "rule_resources": [
-      { "id": "ruleset_shorts", "enabled": false, "path": "rules.json" }
+      { "id": "ruleset_shorts", "enabled": false, "path": "rules.json" },
+      { "id": "ruleset_playables", "enabled": false, "path": "rules-playables.json" }
     ]
   },
   "action": {

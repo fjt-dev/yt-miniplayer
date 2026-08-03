@@ -9,26 +9,12 @@
       }
     },
     "condition": {
-      "regexFilter": "^https://www\\.youtube\\.com/shorts/([a-zA-Z0-9_-]+)",
+      "regexFilter": "^https://www\\.youtube\\.com/shorts/([a-zA-Z0-9_-]+)(?:\\?.*)?$",
       "resourceTypes": ["main_frame", "sub_frame"]
     }
   },
   {
     "id": 2,
-    "priority": 1,
-    "action": {
-      "type": "redirect",
-      "redirect": {
-        "url": "https://www.youtube.com/"
-      }
-    },
-    "condition": {
-      "urlFilter": "https://www.youtube.com/playables*",
-      "resourceTypes": ["main_frame", "sub_frame"]
-    }
-  },
-  {
-    "id": 3,
     "priority": 2,
     "action": {
       "type": "redirect",
@@ -37,7 +23,35 @@
       }
     },
     "condition": {
-      "regexFilter": "^https://www\\.youtube\\.com/shorts/([a-zA-Z0-9_-]+)[^?]*\\?(?:[^&]*&)*list=([a-zA-Z0-9_-]+)",
+      "regexFilter": "^https://www\\.youtube\\.com/shorts/([a-zA-Z0-9_-]+)[^?]*\\?(?:[^&]*&)*list=([a-zA-Z0-9_-]+)(?:&.*)?$",
+      "resourceTypes": ["main_frame", "sub_frame"]
+    }
+  },
+  {
+    "id": 3,
+    "priority": 3,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "regexSubstitution": "https://www.youtube.com/watch?v=\\1&list=\\2&index=\\3"
+      }
+    },
+    "condition": {
+      "regexFilter": "^https://www\\.youtube\\.com/shorts/([a-zA-Z0-9_-]+)[^?]*\\?(?:[^&]*&)*list=([a-zA-Z0-9_-]+)(?:&[^&]*)*&index=([0-9]+)(?:&.*)?$",
+      "resourceTypes": ["main_frame", "sub_frame"]
+    }
+  },
+  {
+    "id": 4,
+    "priority": 3,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "regexSubstitution": "https://www.youtube.com/watch?v=\\1&list=\\3&index=\\2"
+      }
+    },
+    "condition": {
+      "regexFilter": "^https://www\\.youtube\\.com/shorts/([a-zA-Z0-9_-]+)[^?]*\\?(?:[^&]*&)*index=([0-9]+)(?:&[^&]*)*&list=([a-zA-Z0-9_-]+)(?:&.*)?$",
       "resourceTypes": ["main_frame", "sub_frame"]
     }
   }
