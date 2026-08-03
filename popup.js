@@ -1,90 +1,86 @@
 (function () {
   'use strict';
 
-  const toggle = document.getElementById('toggle');
-  const statusDot = document.getElementById('statusDot');
-  const statusText = document.getElementById('statusText');
-  const statusSpan = document.getElementById('statusSpan');
-  const statusCard = document.getElementById('statusCard');
+  const settings = [
+    { key: 'enabled', toggle: 'toggle', card: 'statusCard', dot: 'statusDot', text: 'statusText', span: 'statusSpan', message: 'toggle', defaultValue: true },
+    { key: 'shortsBlocked', toggle: 'shortsToggle', card: 'shortsCard', dot: 'shortsDot', text: 'shortsText', span: 'shortsSpan', message: 'shortsToggle', ruleset: 'ruleset_shorts', defaultValue: false },
+    { key: 'playablesBlocked', toggle: 'playablesToggle', card: 'playablesCard', dot: 'playablesDot', text: 'playablesText', span: 'playablesSpan', message: 'playablesToggle', ruleset: 'ruleset_playables', defaultValue: false },
+  ];
 
-  const shortsToggle = document.getElementById('shortsToggle');
-  const shortsDot = document.getElementById('shortsDot');
-  const shortsText = document.getElementById('shortsText');
-  const shortsSpan = document.getElementById('shortsSpan');
-  const shortsCard = document.getElementById('shortsCard');
+  function elements(setting) {
+    return {
+      toggle: document.getElementById(setting.toggle),
+      card: document.getElementById(setting.card),
+      dot: document.getElementById(setting.dot),
+      text: document.getElementById(setting.text),
+      span: document.getElementById(setting.span),
+    };
+  }
 
-  function updateUI(enabled) {
-    if (enabled) {
-      statusDot.classList.remove('off');
-      statusText.textContent = 'Enabled';
-      statusCard.classList.add('active');
-      statusSpan.textContent = 'enabled';
-      statusSpan.classList.remove('off');
-    } else {
-      statusDot.classList.add('off');
-      statusText.textContent = 'Disabled';
-      statusCard.classList.remove('active');
-      statusSpan.textContent = 'disabled';
-      statusSpan.classList.add('off');
+  function updateUI(setting, enabled) {
+    const ui = elements(setting);
+    ui.toggle.checked = enabled;
+    ui.dot.classList.toggle('off', !enabled);
+    ui.card.classList.toggle('active', enabled);
+    ui.text.textContent = enabled ? 'Enabled' : 'Disabled';
+    ui.span.textContent = enabled ? 'enabled' : 'disabled';
+    ui.span.classList.toggle('off', !enabled);
+  }
+
+  async function notifyYouTubeTabs(message, enabled) {
+    try {
+      const tabs = await chrome.tabs.query({ url: 'https://www.youtube.com/*' });
+      await Promise.allSettled(tabs.map((tab) =>
+        chrome.tabs.sendMessage(tab.id, { type: message, enabled })
+      ));
+    } catch (error) {
+      // The stored setting still applies on the next YouTube navigation.
+      console.warn('Could not notify existing YouTube tabs', error);
     }
   }
 
-  function updateShortsUI(enabled) {
-    if (enabled) {
-      shortsDot.classList.remove('off');
-      shortsText.textContent = 'Enabled';
-      shortsCard.classList.add('active');
-      shortsSpan.textContent = 'enabled';
-      shortsSpan.classList.remove('off');
-    } else {
-      shortsDot.classList.add('off');
-      shortsText.textContent = 'Disabled';
-      shortsCard.classList.remove('active');
-      shortsSpan.textContent = 'disabled';
-      shortsSpan.classList.add('off');
-    }
-  }
-
-  // 保存済みの状態を読み込む
-  chrome.storage.local.get({ enabled: true, shortsBlocked: false }, (result) => {
-    toggle.checked = result.enabled;
-    updateUI(result.enabled);
-
-    shortsToggle.checked = result.shortsBlocked;
-    updateShortsUI(result.shortsBlocked);
-  });
-
-  // Miniplayer トグル変更時
-  toggle.addEventListener('change', () => {
-    const enabled = toggle.checked;
-    chrome.storage.local.set({ enabled }, () => {
-      updateUI(enabled);
-
-      chrome.tabs.query({ url: 'https://www.youtube.com/watch*' }, (tabs) => {
-        for (const tab of tabs) {
-          chrome.tabs.sendMessage(tab.id, { type: 'toggle', enabled }).catch(() => {});
-        }
-      });
-    });
-  });
-
-  // Shorts Blocker トグル変更時
-  shortsToggle.addEventListener('change', () => {
-    const enabled = shortsToggle.checked;
-    chrome.storage.local.set({ shortsBlocked: enabled }, () => {
-      updateShortsUI(enabled);
-
-      if (enabled) {
-        chrome.declarativeNetRequest.updateEnabledRulesets({ enableRulesetIds: ['ruleset_shorts'] });
-      } else {
-        chrome.declarativeNetRequest.updateEnabledRulesets({ disableRulesetIds: ['ruleset_shorts'] });
+  async function saveSetting(setting, enabled) {
+    let rulesetChanged = false;
+    try {
+      if (setting.ruleset) {
+        const change = enabled
+          ? { enableRulesetIds: [setting.ruleset] }
+          : { disableRulesetIds: [setting.ruleset] };
+        await chrome.declarativeNetRequest.updateEnabledRulesets(change);
+        rulesetChanged = true;
       }
+      await chrome.storage.local.set({ [setting.key]: enabled });
+    } catch (error) {
+      if (rulesetChanged) {
+        const rollback = enabled
+          ? { disableRulesetIds: [setting.ruleset] }
+          : { enableRulesetIds: [setting.ruleset] };
+        await chrome.declarativeNetRequest.updateEnabledRulesets(rollback).catch(() => {});
+      }
+      throw error;
+    }
+    await notifyYouTubeTabs(setting.message, enabled);
+  }
 
-      chrome.tabs.query({ url: 'https://www.youtube.com/*' }, (tabs) => {
-        for (const tab of tabs) {
-          chrome.tabs.sendMessage(tab.id, { type: 'shortsToggle', enabled }).catch(() => {});
-        }
-      });
-    });
+  const defaults = Object.fromEntries(settings.map((setting) => [setting.key, setting.defaultValue]));
+  chrome.storage.local.get(defaults, (stored) => {
+    for (const setting of settings) updateUI(setting, stored[setting.key]);
   });
+
+  for (const setting of settings) {
+    const ui = elements(setting);
+    ui.toggle.addEventListener('change', async () => {
+      const enabled = ui.toggle.checked;
+      ui.toggle.disabled = true;
+      try {
+        await saveSetting(setting, enabled);
+        updateUI(setting, enabled);
+      } catch (error) {
+        console.error(`Failed to update ${setting.key}`, error);
+        updateUI(setting, !enabled);
+      } finally {
+        ui.toggle.disabled = false;
+      }
+    });
+  }
 })();

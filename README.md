@@ -2,17 +2,20 @@
 
 [日本語](./README.ja.md)
 
-Chrome extension that restores the YouTube miniplayer button and removes Shorts
+Chrome extension that restores the YouTube miniplayer button and optionally blocks Shorts and YouTube minigames.
 
 ## Features
 
 - Automatically adds a miniplayer button to YouTube's video control bar
-- I will delete the Shorts from YouTube.
-- Toggle on/off via the extension popup
+- Hides Shorts shelves, navigation links, and Shorts in search results and recommendations
+- Opens Shorts in the standard YouTube player while preserving playlist position
+- Hides YouTube Playables links and redirects minigame pages to the home page
+- Controls each feature independently from the extension popup
+- Restores hidden items immediately when a blocker is turned off
 - No data collection or tracking
 
 > [!WARNING]
-> By default, Shorts blocking is disabled. Please enable it manually.
+> Shorts and minigame blocking are disabled by default. Enable only the features you want.
 
 ## Screenshots
 
