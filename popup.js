@@ -2,29 +2,37 @@
   'use strict';
 
   const settings = [
-    { key: 'enabled', toggle: 'toggle', card: 'statusCard', dot: 'statusDot', text: 'statusText', span: 'statusSpan', message: 'toggle', defaultValue: true },
-    { key: 'shortsBlocked', toggle: 'shortsToggle', card: 'shortsCard', dot: 'shortsDot', text: 'shortsText', span: 'shortsSpan', message: 'shortsToggle', ruleset: 'ruleset_shorts', defaultValue: false },
-    { key: 'playablesBlocked', toggle: 'playablesToggle', card: 'playablesCard', dot: 'playablesDot', text: 'playablesText', span: 'playablesSpan', message: 'playablesToggle', ruleset: 'ruleset_playables', defaultValue: false },
+    { key: 'enabled', toggle: 'toggle', card: 'statusCard', text: 'statusText', message: 'toggle', label: 'miniplayerTitle', defaultValue: true },
+    { key: 'shortsBlocked', toggle: 'shortsToggle', card: 'shortsCard', text: 'shortsText', message: 'shortsToggle', label: 'shortsTitle', ruleset: 'ruleset_shorts', defaultValue: false },
+    { key: 'playablesBlocked', toggle: 'playablesToggle', card: 'playablesCard', text: 'playablesText', message: 'playablesToggle', label: 'playablesTitle', ruleset: 'ruleset_playables', defaultValue: false },
   ];
+
+  function message(key) {
+    return chrome.i18n.getMessage(key) || key;
+  }
+
+  function localizeDocument() {
+    document.documentElement.lang = chrome.i18n.getUILanguage().toLowerCase().startsWith('ja') ? 'ja' : 'en';
+    document.querySelectorAll('[data-i18n]').forEach((element) => {
+      element.textContent = message(element.dataset.i18n);
+    });
+  }
 
   function elements(setting) {
     return {
       toggle: document.getElementById(setting.toggle),
       card: document.getElementById(setting.card),
-      dot: document.getElementById(setting.dot),
       text: document.getElementById(setting.text),
-      span: document.getElementById(setting.span),
     };
   }
 
   function updateUI(setting, enabled) {
     const ui = elements(setting);
     ui.toggle.checked = enabled;
-    ui.dot.classList.toggle('off', !enabled);
     ui.card.classList.toggle('active', enabled);
-    ui.text.textContent = enabled ? 'Enabled' : 'Disabled';
-    ui.span.textContent = enabled ? 'enabled' : 'disabled';
-    ui.span.classList.toggle('off', !enabled);
+    ui.text.textContent = message(enabled ? 'statusOn' : 'statusOff');
+    ui.text.classList.toggle('off', !enabled);
+    ui.toggle.setAttribute('aria-label', `${message(setting.label)}: ${message(enabled ? 'statusOn' : 'statusOff')}`);
   }
 
   async function notifyYouTubeTabs(message, enabled) {
@@ -61,6 +69,8 @@
     }
     await notifyYouTubeTabs(setting.message, enabled);
   }
+
+  localizeDocument();
 
   const defaults = Object.fromEntries(settings.map((setting) => [setting.key, setting.defaultValue]));
   chrome.storage.local.get(defaults, (stored) => {

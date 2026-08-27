@@ -1,0 +1,17 @@
+{
+  "extensionName": { "message": "yt-tools" },
+  "extensionDescription": { "message": "YouTubeにミニプレイヤーボタンを追加し、ShortsとPlayablesを必要に応じて非表示・ブロックします。" },
+  "popupTitle": { "message": "yt-tools — YouTube視聴ツール" },
+  "headerSubtitle": { "message": "YouTube視聴ツール" },
+  "featuresHeading": { "message": "機能" },
+  "miniplayerTitle": { "message": "ミニプレイヤーボタン" },
+  "miniplayerDescription": { "message": "YouTubeのプレーヤーにミニプレイヤーボタンを追加します。" },
+  "shortsTitle": { "message": "Shortsを非表示" },
+  "shortsDescription": { "message": "Shortsを隠し、リンクを通常のプレーヤーで開きます。" },
+  "playablesTitle": { "message": "Playablesを非表示" },
+  "playablesDescription": { "message": "Playablesを隠し、関連ページへのアクセスをブロックします。" },
+  "statusOn": { "message": "オン" },
+  "statusOff": { "message": "オフ" },
+  "localSettingsNote": { "message": "設定はこの端末内に保存されます。" },
+  "githubLink": { "message": "GitHub" }
+}

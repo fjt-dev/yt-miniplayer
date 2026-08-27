@@ -4,6 +4,8 @@
 
 Chrome extension that restores the YouTube miniplayer button and optionally blocks Shorts and YouTube minigames.
 
+[Privacy policy](./PRIVACY.md)
+
 ## Features
 
 - Automatically adds a miniplayer button to YouTube's video control bar
@@ -11,6 +13,7 @@ Chrome extension that restores the YouTube miniplayer button and optionally bloc
 - Opens Shorts in the standard YouTube player while preserving playlist position
 - Hides YouTube Playables links and redirects minigame pages to the home page
 - Controls each feature independently from the extension popup
+- Uses a clear light-themed popup in English or Japanese, following Chrome's display language
 - Restores hidden items immediately when a blocker is turned off
 - No data collection or tracking
 
@@ -45,6 +48,10 @@ Chrome extension that restores the YouTube miniplayer button and optionally bloc
 ## Support
 
 Open an issue on GitHub for bugs or suggestions.
+
+## Chrome Web Store package
+
+Run `./scripts/package.sh` to create a submission-ready ZIP in `dist/`. The ZIP contains only runtime files, with `manifest.json` at its root. Store listing copy, permission justifications, and submission notes are in [`docs/CHROME_WEB_STORE.md`](./docs/CHROME_WEB_STORE.md).
 
 ---
 

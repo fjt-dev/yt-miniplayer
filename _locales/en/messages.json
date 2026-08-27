@@ -1,0 +1,17 @@
+{
+  "extensionName": { "message": "yt-tools" },
+  "extensionDescription": { "message": "Improve YouTube with a miniplayer button and optional blockers for Shorts and Playables." },
+  "popupTitle": { "message": "yt-tools — YouTube viewing tools" },
+  "headerSubtitle": { "message": "YouTube viewing tools" },
+  "featuresHeading": { "message": "Features" },
+  "miniplayerTitle": { "message": "Miniplayer button" },
+  "miniplayerDescription": { "message": "Adds a miniplayer button to the YouTube player." },
+  "shortsTitle": { "message": "Hide Shorts" },
+  "shortsDescription": { "message": "Hides Shorts and opens their links in the standard player." },
+  "playablesTitle": { "message": "Hide Playables" },
+  "playablesDescription": { "message": "Hides Playables and blocks their pages." },
+  "statusOn": { "message": "On" },
+  "statusOff": { "message": "Off" },
+  "localSettingsNote": { "message": "Settings stay on this device." },
+  "githubLink": { "message": "GitHub" }
+}

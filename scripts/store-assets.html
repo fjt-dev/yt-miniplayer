@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>yt-tools store assets</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #f8fafc;
+      background: radial-gradient(circle at 15% 10%, #283b5d 0, #172235 35%, #0b1220 100%);
+    }
+    .screenshot { display: flex; height: 100%; padding: 68px 72px; gap: 58px; align-items: center; }
+    .copy { width: 41%; }
+    .brand { display: flex; align-items: center; gap: 18px; margin-bottom: 34px; }
+    .brand img { width: 76px; height: 76px; border-radius: 18px; box-shadow: 0 18px 50px #0008; }
+    .brand-name { font-size: 30px; font-weight: 750; letter-spacing: .2px; }
+    h1 { margin: 0 0 20px; font-size: 54px; line-height: 1.08; letter-spacing: -1.7px; }
+    .lead { margin: 0 0 30px; color: #cbd5e1; font-size: 23px; line-height: 1.5; }
+    .features { display: grid; gap: 13px; color: #e2e8f0; font-size: 18px; }
+    .features div::before { content: "✓"; color: #60a5fa; font-weight: 800; margin-right: 11px; }
+    .demo { width: 59%; display: grid; gap: 22px; }
+    .panel { padding: 24px 26px 27px; border: 1px solid #ffffff1f; border-radius: 22px; background: #0f172ad9; box-shadow: 0 24px 70px #0007; }
+    .label { margin-bottom: 15px; color: #94a3b8; font-size: 15px; font-weight: 750; letter-spacing: 1.8px; text-transform: uppercase; }
+    .player { height: 132px; display: flex; align-items: flex-end; justify-content: center; padding: 27px 24px; border-radius: 13px; background: linear-gradient(145deg, #263449, #111827); }
+    .player img { max-width: 100%; max-height: 100%; image-rendering: auto; }
+    .promo { display: none; height: 100%; padding: 37px 34px; align-items: center; gap: 28px; }
+    .promo img { width: 104px; height: 104px; border-radius: 23px; box-shadow: 0 16px 36px #0009; }
+    .promo h1 { margin: 0 0 9px; font-size: 36px; letter-spacing: -1px; }
+    .promo p { margin: 0; color: #cbd5e1; font-size: 17px; line-height: 1.35; }
+    body.promo-mode .screenshot { display: none; }
+    body.promo-mode .promo { display: flex; }
+  </style>
+</head>
+<body>
+  <main class="screenshot">
+    <section class="copy">
+      <div class="brand"><img src="../icons/icon128.png" alt=""><div class="brand-name">yt-tools</div></div>
+      <h1>A cleaner way to watch YouTube</h1>
+      <p class="lead">Restore the miniplayer control and choose whether Shorts and Playables appear.</p>
+      <div class="features">
+        <div>Miniplayer button</div>
+        <div>Optional Shorts blocker</div>
+        <div>Optional Playables blocker</div>
+      </div>
+    </section>
+    <section class="demo">
+      <div class="panel"><div class="label">Before</div><div class="player"><img src="../screenshots/before_1.png" alt=""></div></div>
+      <div class="panel"><div class="label">With yt-tools</div><div class="player"><img src="../screenshots/after_1.png" alt=""></div></div>
+    </section>
+  </main>
+  <main class="promo">
+    <img src="../icons/icon128.png" alt="">
+    <div><h1>yt-tools</h1><p>Miniplayer, Shorts,<br>and Playables controls.</p></div>
+  </main>
+  <script>
+    if (new URLSearchParams(location.search).get('asset') === 'promo') {
+      document.body.classList.add('promo-mode');
+    }
+  </script>
+</body>
+</html>

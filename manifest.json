@@ -1,8 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "yt-tools",
-  "version": "2.1.0",
-  "description": "Add a miniplayer button and optionally block Shorts and YouTube minigames.",
+  "name": "__MSG_extensionName__",
+  "version": "2.2.0",
+  "description": "__MSG_extensionDescription__",
+  "default_locale": "en",
+  "homepage_url": "https://github.com/fjt-dev/yt-tools",
   "permissions": ["storage", "declarativeNetRequest"],
   "host_permissions": ["https://www.youtube.com/*"],
   "declarative_net_request": {
